@@ -5,48 +5,52 @@
 #include<string>
 using namespace std;
 
-const int SCREEN_WIDTH=910;
-const int SCREEN_HEIGHT=750;
+const int SCREEN_WIDTH = 910;
+const int SCREEN_HEIGHT = 750;
 
-const int arrSize=130;
-const int rectSize=7;
+const int arrSize = 130;
+const int rectSize = 7;
 
-int arr[arrSize];
-int Barr[arrSize];
+int arr1[arrSize];
+int arr2[arrSize];
 
-SDL_Window* window=NULL;
-SDL_Renderer* renderer=NULL;
+SDL_Window* window = NULL;
+SDL_Renderer* renderer = NULL;
 
-bool complete=false;
+bool complete = false;
+
+                                //initialisation and other functions of SDL
 
 bool init()
 {
-    bool success=true;
-    if(SDL_Init(SDL_INIT_VIDEO)<0)
+    //Initialization flag
+    bool success = true;
+    //Initialize SDL
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
-        cout<<"Couldn't initialize SDL. SDL_Error: "<<SDL_GetError();
-        success=false;
+        cout << "Couldn't initialize SDL. SDL_Error: " << SDL_GetError();
+        success = false;
     }
     else
     {
-        if(!(SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")))
+        if (!(SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")))
         {
-            cout<<"Warning: Linear Texture Filtering not enabled.\n";
+            cout << "Warning: Linear Texture Filtering not enabled.\n";
         }
-
-        window=SDL_CreateWindow("Sorting Visualizer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-        if(window==NULL)
+        //Create window
+        window = SDL_CreateWindow("Sorting Visualizer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+        if (window == NULL)
         {
-            cout<<"Couldn't create window. SDL_Error: "<<SDL_GetError();
-            success=false;
+            cout << "Couldn't create window. SDL_Error: " << SDL_GetError();
+            success = false;
         }
         else
         {
-            renderer=SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-            if(renderer==NULL)
+            renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+            if (renderer == NULL)
             {
-                cout<<"Couldn't create renderer. SDL_Error: "<<SDL_GetError();
-                success=false;
+                cout << "Couldn't create renderer. SDL_Error: " << SDL_GetError();
+                success = false;
             }
         }
     }
@@ -57,36 +61,37 @@ bool init()
 void close()
 {
     SDL_DestroyRenderer(renderer);
-    renderer=NULL;
+    renderer = NULL;
 
     SDL_DestroyWindow(window);
-    window=NULL;
+    window = NULL;
 
     SDL_Quit();
 }
 
-void visualize(int x=-1, int y=-1, int z=-1)
+void visualize(int x = -1, int y = -1, int z = -1)
 {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
     SDL_RenderClear(renderer);
 
-    int j=0;
-    for(int i=0; i<=SCREEN_WIDTH-rectSize; i+=rectSize)
+    int j = 0;
+    for (int i = 0; i <= SCREEN_WIDTH - rectSize; i += rectSize)
     {
         SDL_PumpEvents();
 
-        SDL_Rect rect={i, 0, rectSize, arr[j]};
-        if(complete)
+        SDL_Rect rect = { i, 0, rectSize, arr1[j] }; //the x location of the rectangle's upper left corner,the y location of the rectangle's upper left corner,
+                                                     //the width of the rectangle,the height of the rectangle
+        if (complete)
         {
             SDL_SetRenderDrawColor(renderer, 100, 180, 100, 0);
             SDL_RenderDrawRect(renderer, &rect);
         }
-        else if(j==x || j==z)
+        else if (j == x || j == z)
         {
             SDL_SetRenderDrawColor(renderer, 100, 180, 100, 0);
             SDL_RenderFillRect(renderer, &rect);
         }
-        else if(j==y)
+        else if (j == y)
         {
             SDL_SetRenderDrawColor(renderer, 165, 105, 189, 0);
             SDL_RenderFillRect(renderer, &rect);
@@ -101,110 +106,112 @@ void visualize(int x=-1, int y=-1, int z=-1)
     SDL_RenderPresent(renderer);
 }
 
+                                // Sorting Methods 
+
 void inplaceHeapSort(int* input, int n)
 {
-    for(int i=1; i<n; i++)
+    for (int i = 1; i < n; i++)
     {
-       int childIndex=i;
-       int parentIndex=(childIndex-1)/2;
+        int childIndex = i;
+        int parentIndex = (childIndex - 1) / 2;
 
-       while(childIndex>0)
-       {
-           if(input[childIndex]>input[parentIndex])
-           {
-               int temp=input[parentIndex];
-               input[parentIndex]=input[childIndex];
-               input[childIndex]=temp;
-
-           }
-           else
-           {
-               break;
-           }
-
-           visualize(parentIndex, childIndex);
-           SDL_Delay(40);
-
-           childIndex=parentIndex;
-           parentIndex=(childIndex-1)/2;
-       }
-    }
-
-    for(int heapLast=n-1; heapLast>=0 ; heapLast--)
-    {
-        int temp=input[0];
-        input[0]=input[heapLast];
-        input[heapLast]=temp;
-
-        int parentIndex=0;
-        int leftChildIndex=2*parentIndex + 1;
-        int rightChildIndex=2*parentIndex + 2;
-
-        while(leftChildIndex<heapLast)
+        while (childIndex > 0)
         {
-            int maxIndex=parentIndex;
+            if (input[childIndex] > input[parentIndex])
+            {
+                int temp = input[parentIndex];
+                input[parentIndex] = input[childIndex];
+                input[childIndex] = temp;
 
-            if(input[leftChildIndex]>input[maxIndex])
-            {
-                maxIndex=leftChildIndex;
             }
-            if(rightChildIndex<heapLast && input[rightChildIndex]>input[maxIndex])
-            {
-                maxIndex=rightChildIndex;
-            }
-            if(maxIndex==parentIndex)
+            else
             {
                 break;
             }
 
-            int temp=input[parentIndex];
-            input[parentIndex]=input[maxIndex];
-            input[maxIndex]=temp;
+            visualize(parentIndex, childIndex);
+            SDL_Delay(40);
+
+            childIndex = parentIndex;
+            parentIndex = (childIndex - 1) / 2;
+        }
+    }
+
+    for (int heapLast = n - 1; heapLast >= 0; heapLast--)
+    {
+        int temp = input[0];
+        input[0] = input[heapLast];
+        input[heapLast] = temp;
+
+        int parentIndex = 0;
+        int leftChildIndex = 2 * parentIndex + 1;
+        int rightChildIndex = 2 * parentIndex + 2;
+
+        while (leftChildIndex < heapLast)
+        {
+            int maxIndex = parentIndex;
+
+            if (input[leftChildIndex] > input[maxIndex])
+            {
+                maxIndex = leftChildIndex;
+            }
+            if (rightChildIndex<heapLast && input[rightChildIndex]>input[maxIndex])
+            {
+                maxIndex = rightChildIndex;
+            }
+            if (maxIndex == parentIndex)
+            {
+                break;
+            }
+
+            int temp = input[parentIndex];
+            input[parentIndex] = input[maxIndex];
+            input[maxIndex] = temp;
 
             visualize(maxIndex, parentIndex, heapLast);
             SDL_Delay(40);
 
-            parentIndex=maxIndex;
-            leftChildIndex=2*parentIndex + 1;
-            rightChildIndex=2*parentIndex + 2;
+            parentIndex = maxIndex;
+            leftChildIndex = 2 * parentIndex + 1;
+            rightChildIndex = 2 * parentIndex + 2;
         }
     }
 }
 
 int partition_array(int a[], int si, int ei)
 {
-    int count_small=0;
+    int count_small = 0;
 
-    for(int i=(si+1);i<=ei;i++)
+    for (int i = (si + 1); i <= ei; i++)
     {
-        if(a[i]<=a[si])
+        if (a[i] <= a[si])
         {
             count_small++;
         }
     }
-    int c=si+count_small;
-    int temp=a[c];
-    a[c]=a[si];
-    a[si]=temp;
+    int c = si + count_small;
+    int temp = a[c];
+    a[c] = a[si];
+    a[si] = temp;
     visualize(c, si);
 
-    int i=si, j=ei;
+    int i = si, j = ei;
 
-    while(i<c && j>c)
+    while (i<c && j>c)
     {
-        if(a[i]<= a[c])
+        if (a[i] <= a[c])
         {
             i++;
         }
-        else if(a[j]>a[c])
+        else if (a[j] > a[c])
         {
             j--;
         }
         else
         {
-            int temp_1=a[j];
-            a[j]=a[i];
-            a[i]=temp_1;
+            int temp_1 = a[j];
+            a[j] = a[i];
+            a[i] = temp_1;
 
             visualize(i, j);
             SDL_Delay(70);
@@ -218,94 +225,94 @@ int partition_array(int a[], int si, int ei)
 
 void quickSort(int a[], int si, int ei)
 {
-    if(si>=ei)
+    if (si >= ei)
     {
         return;
     }
 
-    int c=partition_array(a, si, ei);
-    quickSort(a, si, c-1);
-    quickSort(a, c+1, ei);
+    int c = partition_array(a, si, ei);
+    quickSort(a, si, c - 1);
+    quickSort(a, c + 1, ei);
 
 }
 
 void merge2SortedArrays(int a[], int si, int ei)
 {
-    int size_output=(ei-si)+1;
-    int* output=new int[size_output];
+    int size_output = (ei - si) + 1;
+    int* output = new int[size_output];
 
-    int mid=(si+ei)/2;
-    int i=si, j=mid+1, k=0;
-    while(i<=mid && j<=ei)
+    int mid = (si + ei) / 2;
+    int i = si, j = mid + 1, k = 0;
+    while (i <= mid && j <= ei)
     {
-        if(a[i]<=a[j])
+        if (a[i] <= a[j])
         {
-            output[k]=a[i];
+            output[k] = a[i];
             visualize(i, j);
             i++;
             k++;
         }
         else
         {
-            output[k]=a[j];
+            output[k] = a[j];
             visualize(i, j);
             j++;
             k++;
         }
 
     }
-    while(i<=mid)
+    while (i <= mid)
     {
-        output[k]=a[i];
+        output[k] = a[i];
         visualize(-1, i);
         i++;
         k++;
     }
-    while(j<=ei)
+    while (j <= ei)
     {
-        output[k]=a[j];
+        output[k] = a[j];
         visualize(-1, j);
         j++;
         k++;
     }
-    int x=0;
-    for(int l=si; l<=ei; l++)
+    int x = 0;
+    for (int l = si; l <= ei; l++)
     {
-        a[l]=output[x];
+        a[l] = output[x];
         visualize(l);
         SDL_Delay(15);
         x++;
     }
-    delete []output;
+    delete[]output;
 }
 
 void mergeSort(int a[], int si, int ei)
 {
-    if(si>=ei)
+    if (si >= ei)
     {
         return;
     }
-    int mid=(si+ei)/2;
+    int mid = (si + ei) / 2;
 
     mergeSort(a, si, mid);
-    mergeSort(a, mid+1, ei);
+    mergeSort(a, mid + 1, ei);
 
     merge2SortedArrays(a, si, ei);
 }
 
 void bubbleSort()
 {
-    for(int i=0; i<arrSize-1; i++)
+    for (int i = 0; i < arrSize - 1; i++)
     {
-        for(int j=0; j<arrSize-1-i; j++)
+        for (int j = 0; j < arrSize - 1 - i; j++)
         {
-            if(arr[j+1]<arr[j])
+            if (arr1[j + 1] < arr1[j])
             {
-                int temp=arr[j];
-                arr[j]=arr[j+1];
-                arr[j+1]=temp;
+                int temp = arr1[j];
+                arr1[j] = arr1[j + 1];
+                arr1[j + 1] = temp;
 
-                visualize(j+1, j, arrSize-i);
+                visualize(j + 1, j, arrSize - i);
             }
             SDL_Delay(1);
         }
@@ -314,64 +321,66 @@ void bubbleSort()
 
 void insertionSort()
 {
-    for(int i=1; i<arrSize; i++)
+    for (int i = 1; i < arrSize; i++)
     {
-        int j=i-1;
-        int temp=arr[i];
-        while(j>=0 && arr[j]>temp)
+        int j = i - 1;
+        int temp = arr1[i];
+        while (j >= 0 && arr1[j] > temp)
         {
-            arr[j+1]=arr[j];
+            arr1[j + 1] = arr1[j];
             j--;
 
-            visualize(i, j+1);
+            visualize(i, j + 1);
             SDL_Delay(5);
         }
-        arr[j+1]=temp;
+        arr1[j + 1] = temp;
     }
 }
 
 void selectionSort()
 {
     int minIndex;
-    for(int i=0;i<arrSize-1;i++)
+    for (int i = 0; i < arrSize - 1; i++)
     {
-        minIndex=i;
-        for(int j=i+1;j<arrSize;j++)
+        minIndex = i;
+        for (int j = i + 1; j < arrSize; j++)
         {
-            if(arr[j]<arr[minIndex])
+            if (arr1[j] < arr1[minIndex])
             {
-                minIndex=j;
+                minIndex = j;
                 visualize(i, minIndex);
             }
             SDL_Delay(1);
         }
-        int temp=arr[i];
-        arr[i]=arr[minIndex];
-        arr[minIndex]=temp;
+        int temp = arr1[i];
+        arr1[i] = arr1[minIndex];
+        arr1[minIndex] = temp;
     }
 }
 
 void loadArr()
 {
-    memcpy(arr, Barr, sizeof(int)*arrSize);
+    memcpy(arr1, arr2, sizeof(int) * arrSize);
 }
 
 void randomizeAndSaveArray()
 {
-    unsigned int seed=(unsigned)time(NULL);
+    unsigned int seed = (unsigned)time(NULL);
     srand(seed);
-    for(int i=0; i<arrSize; i++)
+    for (int i = 0; i < arrSize; i++)
     {
-        int random=rand()%(SCREEN_HEIGHT);
-        Barr[i]=random;
+        int random = rand() % (SCREEN_HEIGHT);
+        arr2[i] = random;
     }
 }
 
+                                //Execution
+
 void execute()
 {
-    if(!init())
+    if (!init())
     {
-        cout<<"SDL Initialization Failed.\n";
+        cout << "SDL Initialization Failed.\n";
     }
     else
     {
@@ -379,79 +388,82 @@ void execute()
         loadArr();
 
         SDL_Event e;
-        bool quit=false;
-        while(!quit)
+        bool quit = false;
+        while (!quit)
         {
-            while(SDL_PollEvent(&e)!=0)
+            while (SDL_PollEvent(&e) != 0)
             {
-                if(e.type==SDL_QUIT)
+                if (e.type == SDL_QUIT)
                 {
-                    quit=true;
-                    complete=false;
+                    quit = true;
+                    complete = false;
                 }
-                else if(e.type==SDL_KEYDOWN)
+                else if (e.type == SDL_KEYDOWN)
                 {
-                    switch(e.key.keysym.sym)
+                    switch (e.key.keysym.sym)
                     {
-                        case(SDLK_q):
-                            quit=true;
-                            complete=false;
-                            cout<<"\nEXITING SORTING VISUALIZER.\n";
-                            break;
-                        case(SDLK_0):
-                            randomizeAndSaveArray();
-                            complete=false;
-                            loadArr();
-                            cout<<"\nNEW RANDOM LIST GENERATED.\n";
-                            break;
-                        case(SDLK_1):
-                            loadArr();
-                            cout<<"\nSELECTION SORT STARTED.\n";
-                            complete=false;
-                            selectionSort();
-                            complete=true;
-                            cout<<"\nSELECTION SORT COMPLETE.\n";
-                            break;
-                        case(SDLK_2):
-                            loadArr();
-                            cout<<"\nINSERTION SORT STARTED.\n";
-                            complete=false;
-                            insertionSort();
-                            complete=true;
-                            cout<<"\nINSERTION SORT COMPLETE.\n";
-                            break;
-                        case(SDLK_3):
-                            loadArr();
-                            cout<<"\nBUBBLE SORT STARTED.\n";
-                            complete=false;
-                            bubbleSort();
-                            complete=true;
-                            cout<<"\nBUBBLE SORT COMPLETE.\n";
-                            break;
-                        case(SDLK_4):
-                            loadArr();
-                            cout<<"\nMERGE SORT STARTED.\n";
-                            complete=false;
-                            mergeSort(arr, 0, arrSize-1);
-                            complete=true;
-                            cout<<"\nMERGE SORT COMPLETE.\n";
-                            break;
-                        case(SDLK_5):
-                            loadArr();
-                            cout<<"\nQUICK SORT STARTED.\n";
-                            complete=false;
-                            quickSort(arr, 0, arrSize-1);
-                            complete=true;
-                            cout<<"\nQUICK SORT COMPLETE.\n";
-                            break;
-                        case(SDLK_6):
-                            loadArr();
-                            cout<<"\nHEAP SORT STARTED.\n";
-                            complete=false;
-                            inplaceHeapSort(arr, arrSize);
-                            complete=true;
-                            cout<<"\nHEAP SORT COMPLETE.\n";
-                            break;
+                    case(SDLK_0):
+                        randomizeAndSaveArray();
+                        complete = false;
+                        loadArr();
+                        cout << "\nNEW RANDOM LIST GENERATED.\n";
+                        break;
+                    case(SDLK_1):
+                        loadArr();
+                        cout << "\nSELECTION SORT STARTED.\n";
+                        complete = false;
+                        selectionSort();
+                        complete = true;
+                        cout << "\nSELECTION SORT COMPLETED.\n";
+                        break;
+                    case(SDLK_2):
+                        loadArr();
+                        cout << "\nINSERTION SORT STARTED.\n";
+                        complete = false;
+                        insertionSort();
+                        complete = true;
+                        cout << "\nINSERTION SORT COMPLETED.\n";
+                        break;
+                    case(SDLK_3):
+                        loadArr();
+                        cout << "\nBUBBLE SORT STARTED.\n";
+                        complete = false;
+                        bubbleSort();
+                        complete = true;
+                        cout << "\nBUBBLE SORT COMPLETED.\n";
+                        break;
+                    case(SDLK_4):
+                        loadArr();
+                        cout << "\nMERGE SORT STARTED.\n";
+                        complete = false;
+                        mergeSort(arr1, 0, arrSize - 1);
+                        complete = true;
+                        cout << "\nMERGE SORT COMPLETED.\n";
+                        break;
+                    case(SDLK_5):
+                        loadArr();
+                        cout << "\nQUICK SORT STARTED.\n";
+                        complete = false;
+                        quickSort(arr1, 0, arrSize - 1);
+                        complete = true;
+                        cout << "\nQUICK SORT COMPLETED.\n";
+                        break;
+                    case(SDLK_6):
+                        loadArr();
+                        cout << "\nHEAP SORT STARTED.\n";
+                        complete = false;
+                        inplaceHeapSort(arr1, arrSize);
+                        complete = true;
+                        cout << "\nHEAP SORT COMPLETED.\n";
+                        break;
+                    case(SDLK_q):
+                        quit = true;
+                        complete = false;
+                        cout << "\nEXITING SORTING VISUALIZER.\n";
+                        break;
+                    default:
+                        cout << "\nInvalid Input.";
+                        break;
                     }
                 }
             }
@@ -461,24 +473,31 @@ void execute()
     }
 }
 
+                                //Introduction and Controls
+
+void ControlsAfterStart()
+{
+    cout << "Available Controls after starting the SORTING VISUALIZER :-\n"
+        << "    Use 0 to Generate a different randomized list.\n"
+        << "    Use 1 to start Selection Sort Algorithm.\n"
+        << "    Use 2 to start Insertion Sort Algorithm.\n"
+        << "    Use 3 to start Bubble Sort Algorithm.\n"
+        << "    Use 4 to start Merge Sort Algorithm.\n"
+        << "    Use 5 to start Quick Sort Algorithm.\n"
+        << "    Use 6 to start Heap Sort Algorithm.\n"
+        << "    Use q to exit out of Sorting Visualizer.\n";
+}
+
 bool controls()
 {
-    cout <<"WARNING: Giving repetitive commands may cause latency and the visualizer may behave unexpectedly. Please give a new command only after the current command's execution is done.\n\n"
-         <<"Available Controls inside Sorting Visualizer:-\n"
-         <<"    Use 0 to Generate a different randomized list.\n"
-         <<"    Use 1 to start Selection Sort Algorithm.\n"
-         <<"    Use 2 to start Insertion Sort Algorithm.\n"
-         <<"    Use 3 to start Bubble Sort Algorithm.\n"
-         <<"    Use 4 to start Merge Sort Algorithm.\n"
-         <<"    Use 5 to start Quick Sort Algorithm.\n"
-         <<"    Use 6 to start Heap Sort Algorithm.\n"
-         <<"    Use q to exit out of Sorting Visualizer\n\n"
-         <<"PRESS ENTER TO START SORTING VISUALIZER...\n\n"
-         <<"Or type -1 and press ENTER to quit the program.";
+    cout << "WARNING: Giving repetitive commands may cause latency and the visualizer may behave unexpectedly. Please give a new command only after the current command's execution is done.\n\n\n"
+        << "PRESS ENTER TO START SORTING VISUALIZER...\n"
+        << "                   OR\n"
+        << "TYPE -1 AND PRESS ENTER TO QUIT THE PROGRAM.\n";
 
     string s;
     getline(cin, s);
-    if(s=="-1")
+    if (s == "-1")
     {
         return false;
     }
@@ -491,33 +510,41 @@ bool controls()
 
 void intro()
 {
-    cout<<"==============================Sorting Visualizer==============================\n\n"
-        <<"Visualization of different sorting algorithms in C++ with SDL2 Library. A sorting algorithm is an algorithm that puts the elements of a list in a certain order. While there are a large number of sorting algorithms, in practical implementations a few algorithms predominate.\n"
-        <<"In this implementation of sorting visualizer, we'll be looking at some of these sorting algorithms and visually comprehend their working.\n"
-        <<"The sorting algorithms covered here are Selection Sort, Insertion Sort, Bubble Sort, Merge Sort, Quick Sort and Heap Sort.\n"
-        <<"The list size is fixed to 130 elements. You can randomize the list and select any type of sorting algorithm to call on the list from the given options. Here, all sorting algorithms will sort the elements in ascending order. The sorting time being visualized for an algorithm is not exactly same as their actual time complexities. The relatively faster algorithms like Merge Sort, etc. have been delayed so that they could be properly visualized.\n\n"
-        <<"Press ENTER to show controls...";
+    cout << "=============================>Sorting Visualizer<=============================\n\n"
+        << "Visualization of different sorting algorithms in C++ with SDL2 Library. A sorting algorithm is an algorithm that puts the elements of a list in a certain order."
+        << "While there are a large number of sorting algorithms, in practical implementations a few algorithms predominate.\n"
+        << "In this implementation of sorting visualizer, we'll be looking at some of these sorting algorithms and visually comprehend their working.\n"
+        << "The sorting algorithms covered here are Selection Sort, Insertion Sort, Bubble Sort, Merge Sort, Quick Sort and Heap Sort.\n"
+        << "The list size is fixed to 130 elements. You can randomize the list and select any type of sorting algorithm to call on the list from the given options." 
+        << "Here, all sorting algorithms will sort the elements in ascending order.The sorting time being visualized for an algorithm is not exactly same as their actual time complexities."
+        << "The relatively faster algorithms like Merge Sort, etc.have been delayed so that they could be properly visualized.\n\n"
+        << "Press ENTER to show controls...";
 
     string s;
     getline(cin, s);
-    if(s=="\n")
+    if (s == "\n")
     {
         return;
     }
 }
 
+                                //Main function
+
 int main(int argc, char* args[])
 {
     intro();
-
-    while(1)
+    
+    while (1)
     {
-        cout<<'\n';
-        if(controls())
+        cout << '\n';
+        if (controls())
+        {
+            ControlsAfterStart();
             execute();
+        }
         else
         {
-            cout<<"\nEXITING PROGRAM.\n";
+            cout << "\nEXITING PROGRAM.\n";
             break;
         }
     }
